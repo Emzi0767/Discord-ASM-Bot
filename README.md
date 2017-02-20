@@ -12,7 +12,16 @@ ASM is built around LLVM.
 * PIP Packages:
    * `discord.py` 0.16.x
    * `psutil` 5.1.2
-* (Recommended, Linux-only) `uvloop` 0.7.2
+   * (Recommended, Linux-only) `uvloop` 0.7.2
+* `clang-3.9`
+* `llvm-objdump-3.9`
+* `bash`
+* Clang and LLVM need to support the following architectures:
+   * `i386`
+   * `x86_64`
+   * `armv6k-arm-none-eabi`
+   * `armv7a-arm-none-eabi`
+   * `aarch64-arm-none-eabi`
 
 ##SETUP
 
