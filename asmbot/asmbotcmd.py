@@ -69,7 +69,7 @@ class AsmBotCommands:
         embed = self._embed(ctx, "Assembler help", "To invoke Assembler, call " + me.mention + " `<architecture>` `<assembly code block>`. For help, call " + me.mention + " help. "
                             "Source code of the bot is available [on Emzi's GitHub](https://github.com/Emzi0767/Discord-ASM-Bot). To invite the bot to your server, "
                             "Follow [this invite link](https://discordapp.com/oauth2/authorize?client_id=283200903937261569&scope=bot&permissions=0). For more help or support, join "
-                            "[my server](https://discord.gg/rGKrJDR).", "info")
+                            "[Emzi's server](https://discord.gg/rGKrJDR).", "info")
         embed.add_field(name="Example", value=me.mention + " x86\n```asm\nmov eax, sp\n```", inline=False)
         embed.add_field(name="Available architectures", value="`x86`: `x86`, `i386`\n`x86 (AT&T syntax)`: `x86_att`, `i386_att`\n`x64`: `x64`, `x86_64`\n`x64 (AT&T syntax)`: `x64_att`, "
                                                               "`x86_64_att`\n`ARMv6`: `armv6`, `armv6k`\n`ARMv7`, `armv7`, `armv7a`\n`ARMv8`: `armv8`, `aarch64`",
