@@ -1,5 +1,7 @@
 #Assembler Bot by Emzi0767
 
+[![Emzi's Central Dispatch](https://discordapp.com/api/guilds/207879549394878464/widget.png)](https://discord.gg/rGKrJDR)
+
 ##ABOUT
 
 A Discord bot built on top of [discord.py library](https://github.com/Rapptz/discord.py/). It's designed to allow quickly assembing x86, x86_64, and ARM assembly, and output resulting bytes.
@@ -35,6 +37,12 @@ In order for bot to run, you will need to set up your environment.
 ##RUNNING
 
 Run `runasm.sh`. That's it, your bot is now running.
+
+##SUPPORT
+
+Should you still have any questions regarding the bot, feel free to join my server. I'll try to answer an questions:
+
+[![Emzi's Central Dispatch](https://discordapp.com/api/guilds/207879549394878464/embed.png?style=banner1)](https://discord.gg/rGKrJDR)
 
 ##REPORTING BUGS
 
