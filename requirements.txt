@@ -1,2 +1,2 @@
-discord.py>=0.16.5
+curious
 psutil>=5.1.2

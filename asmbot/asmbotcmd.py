@@ -6,6 +6,7 @@ from discord.ext import commands
 class AsmBotCommands:
     def __init__(self, bot):
         self._bot = bot
+        self._script = None
 
     @property
     def script(self):

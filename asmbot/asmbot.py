@@ -3,28 +3,29 @@ import traceback
 import sys
 import os
 import asyncio
-import discord
+import curious.dataclasses
+import curious.commands
 import asmbot
-from discord.ext import commands
+from curious.core.client import Client
 from concurrent.futures import CancelledError
 
 
-class AsmBot(commands.Bot):
+class AsmBot(Client):
     def __init__(self, **kwargs):
         super().__init__(command_prefix=self.prefix_callback, **kwargs)
+        self._future = None
 
     def cancel_everything(self):
         self.future.cancel()
 
-    def _embed(self, ctx, title, description, cat="info"):
+    def _embed(self, ctx:curious.commands.Context, title, description, cat="info"):
         clr = 0x00007FFF
         if cat == "error":
             clr = 0x00FF7F00
         elif cat == "success":
             clr = 0x007FFF00
 
-        embed = discord.Embed(title=title, description=description, colour=discord.Colour(clr))
-        embed.set_thumbnail(url=ctx.bot.user.avatar_url)
+        embed = curious.dataclasses.Embed(title=title, description=description, colour=clr, thumbnail=ctx.bot.user.avatar_url)
         return embed
 
     def _embed_self(self, title, description, cat="info"):
@@ -34,22 +35,19 @@ class AsmBot(commands.Bot):
         elif cat == "success":
             clr = 0x007FFF00
 
-        embed = discord.Embed(title=title, description=description, colour=discord.Colour(clr))
-        embed.set_thumbnail(url=self.user.avatar_url)
+        embed = curious.dataclasses.Embed(title=title, description=description, colour=clr, thumbnail=self.user.avatar_url)
         return embed
 
     def _prefix(self, guild):
         return ["<@" + self.user.id + "> ", "<@!" + self.user.id + "> "]
 
     def _restart_gamewatch(self, fut):
-        self.tasks.remove(fut)
         fut.cancel()
 
-        if not self.is_closed:
+        if not self.is_closed and not fut.cancelled():
             asmbot.log("Rick roll for shard {} crashed, restarting".format(self.shard_id), tag="ASM GAME")
             task = self.loop.create_task(self.game_watch())
             task.add_done_callback(self._restart_gamewatch)
-            self.tasks.append(task)
 
     def prefix_callback(self, bot, message):
         return self._prefix(message.channel.server)
@@ -118,11 +116,9 @@ class AsmBot(commands.Bot):
     # Bot preparation
     async def on_ready(self):
         asmbot.log("Logged in as {} on shard {} as PID {:05}".format(self.user.name, self.shard_id, os.getpid()), tag="INSTANCE")
-        self.tasks = []
 
         task = self.loop.create_task(self.game_watch())
         task.add_done_callback(self._restart_gamewatch)
-        self.tasks.append(task)
 
     # Command and chat handling
     async def on_message(self, message):

@@ -13,8 +13,8 @@ except ImportError:
 
 class AsmBotLauncher:
     def __init__(self):
-        self.loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(self.loop)
+        self._loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self._loop)
 
     @property
     def loop(self):
@@ -24,14 +24,14 @@ class AsmBotLauncher:
     def loop(self, value):
         self._loop = value
 
-    def run(self, **kwargs):
+    def run(self, shard_id=0, shard_count=1, token=None, script=None, **kwargs):
         loop = self.loop
 
         # core bot config
-        asmbot_shard = kwargs.get("shard_id", 0)
-        asmbot_totalshards = kwargs.get("shard_count", 1)
-        asmbot_token = kwargs.get("token", None)
-        asmbot_script = kwargs.get("script", None)
+        asmbot_shard = shard_id
+        asmbot_totalshards = shard_count
+        asmbot_token = token
+        asmbot_script = script
 
         # init pam
         asmbot.log("Initializing ASM", tag="ASM")
@@ -64,7 +64,7 @@ class AsmBotLauncher:
                 task.cancel()
                 try:
                     loop.run_until_complete(task)
-                except Exception:
+                except:
                     pass
 
             loop.close()
