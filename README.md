@@ -38,7 +38,11 @@ In order for bot to run, you will need to set up your environment.
 
 Run `runasm.sh`. That's it, your bot is now running.
 
-##SUPPORT
+##SUPPORT ME
+
+If you feel like supporting me by providing me with currency that I can exchange for goods and services, you can do so on [my Patreon](https://www.patreon.com/emzi0767).
+
+##ADDITIONAL HELP
 
 Should you still have any questions regarding the bot, feel free to join my server. I'll try to answer an questions:
 
