@@ -1,4 +1,5 @@
 import datetime
+import traceback
 import os
 
 
@@ -20,3 +21,14 @@ def log(*messages, **kwargs):
 
     for msg in msgs:
         print("{}{}".format(prefix, msg))
+
+
+def logex(exception: Exception, **kwargs):
+    extype = type(exception)
+    value = exception
+    tback = exception.__traceback__
+    exinfo = (extype, value, tback)
+
+    exfmts = [s.replace("\\n", "") for s in traceback.format_exception(*exinfo)]
+
+    log(*exfmts, **kwargs)

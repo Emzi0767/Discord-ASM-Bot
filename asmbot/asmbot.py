@@ -80,6 +80,9 @@ class AsmBot(commands.Bot):
         except CancelledError:
             pass
 
+        except Exception as e:
+            asmbot.logex(e, tag="ASM GAME")
+
         finally:
             asmbot.log("Gamewatch for shard {} closed".format(self.shard_id), tag="ASM GAME")
 
