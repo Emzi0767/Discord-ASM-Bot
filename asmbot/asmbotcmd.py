@@ -67,9 +67,10 @@ class AsmBotCommands:
         me = ctx.message.channel.server.me
 
         embed = self._embed(ctx, "Assembler help", "To invoke Assembler, call " + me.mention + " `<architecture>` `<assembly code block>`. For help, call " + me.mention + " help. "
-                            "Source code of the bot is available [on Emzi's GitHub](https://github.com/Emzi0767/Discord-ASM-Bot). To invite the bot to your server, "
-                            "Follow [this invite link](https://discordapp.com/oauth2/authorize?client_id=283200903937261569&scope=bot&permissions=0). For more help or support, join "
-                            "[Emzi's server](https://discord.gg/rGKrJDR).", "info")
+                                                                                                                                                                           "Source code of the bot is available [on Emzi's GitHub](https://github.com/Emzi0767/Discord-ASM-Bot). To invite the bot to your server, "
+                                                                                                                                                                           "Follow [this invite link](https://discordapp.com/oauth2/authorize?client_id=283200903937261569&scope=bot&permissions=0). For more help or support, join "
+                                                                                                                                                                           "[Emzi's server](https://discord.gg/rGKrJDR).",
+                            "info")
         embed.add_field(name="Example", value=me.mention + " x86\n```asm\nmov eax, sp\n```", inline=False)
         embed.add_field(name="Available architectures", value="`x86`: `x86`, `i386`\n`x86 (AT&T syntax)`: `x86_att`, `i386_att`\n`x64`: `x64`, `x86_64`\n`x64 (AT&T syntax)`: `x64_att`, "
                                                               "`x86_64_att`\n`ARMv6`: `armv6`, `armv6k`\n`ARMv7`, `armv7`, `armv7a`\n`ARMv8`: `armv8`, `aarch64`",
@@ -146,5 +147,25 @@ class AsmBotCommands:
         """
         snip = self._extract_code(code)
         snip = self._assemble(snip, "aarch64-arm-none-eabi")
+
+        await ctx.bot.say("```\n" + snip + "\n```")
+
+    @commands.command(name="mips", description="Assemble MIPS assembly", pass_context=True)
+    async def mips(self, ctx, *, code):
+        """
+        Assembles MIPS assembly
+        """
+        snip = self._extract_code(code)
+        snip = self._assemble(snip, "mips")
+
+        await ctx.bot.say("```\n" + snip + "\n```")
+
+    @commands.command(name="mipsel", description="Assemble little-endian MIPS assembly", pass_context=True, aliases=["mips_le"])
+    async def mipsel(self, ctx, *, code):
+        """
+        Assembles little-endian MIPS assembly
+        """
+        snip = self._extract_code(code)
+        snip = self._assemble(snip, "mipsel")
 
         await ctx.bot.say("```\n" + snip + "\n```")

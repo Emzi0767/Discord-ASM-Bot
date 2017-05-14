@@ -17,5 +17,17 @@
 #
 # aarch64-arm-none-eabi
 #   armv8, aarch64
+#
+# mips
+#   mips
+#
+# mipsel
+#   mipsel, mips_le
+#
+# mips64
+#   mips64
+#
+# mips64el
+#   mips64el, mips64_le
 
 cat <&0 | clang-3.9 --target=$1 $2 -x assembler -c -o /proc/self/fd/1 /proc/self/fd/0 | llvm-objdump-3.9 -s -j .text /proc/self/fd/0
