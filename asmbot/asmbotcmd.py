@@ -6,6 +6,39 @@ from discord.ext import commands
 class AsmBotCommands:
     def __init__(self, bot):
         self._bot = bot
+        # Commented out ones require clang-4.0+ or binaries not available on my system. Feel free to test them, and enable them if they work for you.
+        self._archmap = [
+            ArchitectureMap("x86", "i686-pc-none-gnu", "", ".intel_syntax noprefix", "x86", "i386", "i486", "i586", "i686"),
+            ArchitectureMap("x64", "amd64-pc-none-gnu", "", ".intel_syntax noprefix", "x64", "x86_64", "amd64"),
+            ArchitectureMap("x86 (AT&T syntax)", "i686-pc-none-gnu", "", "", "x86_att", "i386_att", "i486_att", "i586_att", "i686_att"),
+            ArchitectureMap("x64 (AT&T syntax)", "amd64-pc-none-gnu", "", "", "x64_att", "x86_64_att", "amd64_att"),
+            ArchitectureMap("ARMv6", "armv6-arm-none-eabi", "-mfloat-abi=hard", "", "armv6", "armv6k"),
+            ArchitectureMap("ARMv6 (big-endian)", "armv6eb-arm-none-eabi", "-mfloat-abi=hard", "", "armv6eb", "armv6keb", "armv6_be", "armv6k_be"),
+            ArchitectureMap("ARMv7", "armv7a-arm-none-eabi", "-mfloat-abi=hard", "", "armv7", "armv7a"),
+            ArchitectureMap("ARMv7 (big-endian)", "armv7aeb-arm-none-eabi", "-mfloat-abi=hard", "", "armv7eb", "armv7aeb", "armv7_be", "armv7a_be"),
+            ArchitectureMap("ARMv8", "armv8a-arm-none-eabi", "", "", "armv8", "armv8a"),
+            ArchitectureMap("ARMv8 (big-endian)", "armv8aeb-arm-none-eabi", "", "", "armv8eb", "armv8aeb", "armv8_be", "armv8a_be"),
+            ArchitectureMap("AArch64 (64-bit ARMv8)", "aarch64-arm-none-eabi", "", "", "aarch64", "arm64"),
+            ArchitectureMap("AArch64 (64-bit ARMv8, big-endian)", "aarch64_be-arm-none-eabi", "", "", "aarch64eb", "arm64eb", "aarch64_be", "arm64_be"),
+            ArchitectureMap("MIPS", "mips-pc-none-gnu", "", "", "mips"),
+            ArchitectureMap("MIPS (little-endian)", "mipsel-pc-none-gnu", "", "", "mipsel", "mips_le"),
+            # ArchitectureMap("MIPS64", "mips64-pc-none-gnu", "", "", "mips64"),
+            # ArchitectureMap("MIPS64 (little-endian)", "mips64el-pc-none-gnu", "", "", "mips64el", "mips64_le"),
+            ArchitectureMap("PowerPC", "powerpc-pc-none-gnu", "", "", "powerpc", "powerpc32", "ppc", "ppc32"),
+            ArchitectureMap("PowerPC64", "powerpc64-pc-none-gnu", "", "", "powerpc64", "ppc64"),
+            ArchitectureMap("PowerPC64 (little-endian)", "powerpc64le-pc-none-gnu", "", "", "powerpc64el", "ppc64el", "powerpc64_le", "ppc64_le"),
+            # ArchitectureMap("Atmel AVR", "avr-none-none-gnu", "", "", "avr", "atmel"),
+            # ArchitectureMap("TI MSP430", "msp430-none-none-gnu", "", "", "msp430")
+            # ArchitectureMap("RISC-V", "riscv32-pc-none-gnu", "", "", "riscv32")
+            # ArchitectureMap("RISC-V 64", "riscv64-pc-none-gnu", "", "", "riscv64")
+            # ArchitectureMap("Qualcomm Hexagon", "hexagon-pc-none-gnu", "", "", "hexagon", "qdsp6")
+            # ArchitectureMap("S390x", "s390x-pc-none-gnu", "", "", "s390x")
+            # ArchitectureMap("SPARC", "sparc-pc-none-gnu", "", "", "sparc")
+            # ArchitectureMap("SPARC (little-endian)", "sparcel-pc-none-gnu", "", "", "sparcel", "sparc_le")
+            # ArchitectureMap("SPARC v9 (SPARC64)", "sparc64-pc-none-gnu", "", "", "sparcv9", "sparc64")
+            # ArchitectureMap("XCore", "xcore-pc-none-gnu", "", "", "xcore")
+            # ArchitectureMap("SPARC", "sparc-pc-none-gnu", "", "", "sparc")
+        ]
 
     @property
     def script(self):
@@ -60,121 +93,65 @@ class AsmBotCommands:
         return " ".join(obytes)
 
     @commands.command(name="help", description="Prints help text", pass_context=True)
-    async def help(self, ctx):
+    async def help(self, ctx, *, architecture: str = None):
         """
         Prints help
         """
         me = ctx.message.channel.server.me
 
-        embed = self._embed(ctx, "Assembler help", "To invoke Assembler, call " + me.mention + " `<architecture>` `<assembly code block>`. For help, call " + me.mention + " help. Source code of the "
-                                                   "bot is available [on Emzi's GitHub](https://github.com/Emzi0767/Discord-ASM-Bot). To invite the bot to your server, Follow [this invite link]"
-                                                   "(https://discordapp.com/oauth2/authorize?client_id=283200903937261569&scope=bot&permissions=0). For more help or support, join [Emzi's server]"
-                                                   "(https://discord.gg/rGKrJDR).", "info")
-        embed.add_field(name="Example", value=me.mention + " x86\n```asm\nmov eax, sp\n```", inline=False)
-        embed.add_field(name="Available architectures", value="`x86`: `x86`, `i386`\n`x86 (AT&T syntax)`: `x86_att`, `i386_att`\n`x64`: `x64`, `x86_64`\n`x64 (AT&T syntax)`: `x64_att`, "
-                                                              "`x86_64_att`\n`ARMv6`: `armv6`, `armv6k`\n`ARMv7`, `armv7`, `armv7a`\n`ARMv8`: `armv8`, `armv8a`\n`AArch64 (64-bit ARMv8)`: `aarch64`, "
-                                                              "`arm64`\n`MIPS`: `mips`\n`MIPS little-endian`: `mipsel`, `mips_le`", inline=False)
+        if architecture is None:
+            embed = self._embed(ctx, "Assembler help", "To invoke Assembler, call {} assemble `<architecture>` `<assembly code block>`. For help, call {} help or {} help `[architecture]` to show how"
+                                                       " to assemble for given architecture. Source code of the bot is available [on Emzi's GitHub](https://github.com/Emzi0767/Discord-ASM-Bot). To"
+                                                       " invite the bot to your server, Follow [this invite link]"
+                                                       "(https://discordapp.com/oauth2/authorize?client_id=283200903937261569&scope=bot&permissions=0). For more help or support, join [Emzi's server]"
+                                                       "(https://discord.gg/rGKrJDR).".format(me.mention, me.mention, me.mention), "info")
+            embed.add_field(name="Example", value=me.mention + " assemble x86 ```x86asm\nmov eax, sp\n```", inline=False)
+
+            archstr = "• " + "\n• ".join(x.display_name for x in self._archmap)
+            embed.add_field(name="Available architectures", value=archstr, inline=False)
+
+        else:
+            arch = None
+            for xarch in self._archmap:
+                if xarch.display_name == architecture:
+                    arch = xarch
+
+            if arch is None:
+                raise Exception("Unknown architecture specified")
+
+            embed = self._embed(ctx, "Architecture help", "Architecture name: {}\nArchitecture full name: `{}`".format(arch.display_name, arch.clang_name))
+
+            archstr = ", ".join("`{}`".format(x) for x in arch.names)
+            embed.add_field(name="Architecture aliases", value=archstr, inline=False)
 
         await ctx.bot.say(embed=embed)
 
-    @commands.command(name="x86", description="Assemble x86 assembly", pass_context=True, aliases=["i386"])
-    async def x86(self, ctx, *, code):
+    @commands.command(name="assemble", description="Assembles given assembly for given architecture", pass_context=True, aliases=["asm"])
+    async def assemble(self, ctx, architecture: str, *, code):
         """
-        Assembles x86 assembly
+        Assembles given assembly for given architecture
         """
+        architecture = architecture.lower()
+        arch = None
+        for xarch in self._archmap:
+            if architecture in xarch.names:
+                arch = xarch
+
+        if arch is None:
+            raise Exception("Unknown architecture specified")
+
         snip = self._extract_code(code)
-        snip = ".intel_syntax noprefix\n" + snip
-        snip = self._assemble(snip, "i386")
+        if arch.code_addon is not None:
+            snip = arch.code_addon + snip
+        snip = self._assemble(snip, arch.clang_name, arch.clang_options)
 
         await ctx.bot.say("```\n" + snip + "\n```")
 
-    @commands.command(name="x86_att", description="Assemble x86 assembly using AT&T syntax", pass_context=True, aliases=["i386_att"])
-    async def x86_att(self, ctx, *, code):
-        """
-        Assembles x86 assembly using AT&T syntax
-        """
-        snip = self._extract_code(code)
-        snip = self._assemble(snip, "i386")
 
-        await ctx.bot.say("```\n" + snip + "\n```")
-
-    @commands.command(name="x64", description="Assemble x64 assembly", pass_context=True, aliases=["x86_64"])
-    async def x64(self, ctx, *, code):
-        """
-        Assembles x64 assembly
-        """
-        snip = self._extract_code(code)
-        snip = ".intel_syntax noprefix\n" + snip
-        snip = self._assemble(snip, "x86_64")
-
-        await ctx.bot.say("```\n" + snip + "\n```")
-
-    @commands.command(name="x64_att", description="Assemble x64 assembly using AT&T syntax", pass_context=True, aliases=["x86_64_att"])
-    async def x64_att(self, ctx, *, code):
-        """
-        Assembles x64 assembly using AT&T syntax
-        """
-        snip = self._extract_code(code)
-        snip = self._assemble(snip, "x86_64")
-
-        await ctx.bot.say("```\n" + snip + "\n```")
-
-    @commands.command(name="armv6", description="Assemble ARMv6 assembly", pass_context=True, aliases=["armv6k"])
-    async def armv6(self, ctx, *, code):
-        """
-        Assembles ARMv6 assembly
-        """
-        snip = self._extract_code(code)
-        snip = self._assemble(snip, "armv6-arm-none-eabi", "-mfloat-abi=hard")
-
-        await ctx.bot.say("```\n" + snip + "\n```")
-
-    @commands.command(name="armv7", description="Assemble ARMv7 assembly", pass_context=True, aliases=["armv7a"])
-    async def armv7(self, ctx, *, code):
-        """
-        Assembles ARMv7 assembly
-        """
-        snip = self._extract_code(code)
-        snip = self._assemble(snip, "armv7a-arm-none-eabi", "-mfloat-abi=hard")
-
-        await ctx.bot.say("```\n" + snip + "\n```")
-
-    @commands.command(name="armv8", description="Assemble ARMv8 assembly", pass_context=True, aliases=["armv8a"])
-    async def armv8(self, ctx, *, code):
-        """
-        Assembles ARMv8 assembly
-        """
-        snip = self._extract_code(code)
-        snip = self._assemble(snip, "armv8a-arm-none-eabi")
-
-        await ctx.bot.say("```\n" + snip + "\n```")
-
-    @commands.command(name="aarch64", description="Assemble AArch64 (64-bit ARMv8) assembly", pass_context=True, aliases=["arm64"])
-    async def aarch64(self, ctx, *, code):
-        """
-        Assembles AArch64 (64-bit ARMv8) assembly
-        """
-        snip = self._extract_code(code)
-        snip = self._assemble(snip, "aarch64-arm-none-eabi")
-
-        await ctx.bot.say("```\n" + snip + "\n```")
-
-    @commands.command(name="mips", description="Assemble MIPS assembly", pass_context=True)
-    async def mips(self, ctx, *, code):
-        """
-        Assembles MIPS assembly
-        """
-        snip = self._extract_code(code)
-        snip = self._assemble(snip, "mips")
-
-        await ctx.bot.say("```\n" + snip + "\n```")
-
-    @commands.command(name="mipsel", description="Assemble little-endian MIPS assembly", pass_context=True, aliases=["mips_le"])
-    async def mipsel(self, ctx, *, code):
-        """
-        Assembles little-endian MIPS assembly
-        """
-        snip = self._extract_code(code)
-        snip = self._assemble(snip, "mipsel")
-
-        await ctx.bot.say("```\n" + snip + "\n```")
+class ArchitectureMap(object):
+    def __init__(self, display_name: str, clang_name: str, clang_opt: str, code_add: str, *names: str):
+        self.display_name = display_name
+        self.clang_name = clang_name
+        self.clang_options = clang_opt
+        self.code_addon = code_add
+        self.names = names

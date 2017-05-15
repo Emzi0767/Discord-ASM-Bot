@@ -10,8 +10,12 @@ from concurrent.futures import CancelledError
 
 
 class AsmBot(commands.Bot):
-    def __init__(self, **kwargs):
+    def __init__(self, guild_blacklist=[], guild_exempt_list=[], **kwargs):
         super().__init__(command_prefix=self.prefix_callback, **kwargs)
+        self.tasks = []
+        self.guild_blacklist = guild_blacklist
+        self.guild_exempt_list = guild_exempt_list
+        self.processed_guilds = []
 
     def cancel_everything(self):
         self.future.cancel()
@@ -121,11 +125,46 @@ class AsmBot(commands.Bot):
     # Bot preparation
     async def on_ready(self):
         asmbot.log("Logged in as {} on shard {} as PID {:05}".format(self.user.name, self.shard_id, os.getpid()), tag="INSTANCE")
-        self.tasks = []
+
+        for gld in self.servers:
+            await self.on_server_available(gld)
 
         task = self.loop.create_task(self.game_watch())
         task.add_done_callback(self._restart_gamewatch)
         self.tasks.append(task)
+
+    # Guild init
+    async def on_server_join(self, guild):
+        await self.on_server_available(guild)
+
+    async def on_server_available(self, guild):
+        if guild.id in self.processed_guilds:
+            return
+
+        asmbot.log("Guild available: {}".format(guild.name), tag="ASM CORE")
+
+        # check blacklist
+        if guild.id in self.guild_exempt_list:
+            asmbot.log("Ignoring exempt guild {} ({})".format(guild.name, guild.id), tag="ASM CORE")
+            self.processed_guilds += guild.id
+            return
+
+        if guild.id in self.guild_blacklist:
+            asmbot.log("Leaving blacklisted guild {} ({})".format(guild.name, guild.id), tag="ASM CORE")
+            await self.leave_server(guild)
+
+        mra = [0, 0]
+        for xm in guild.members:
+            mra[0] += 1
+            if xm.bot:
+                mra[1] += 1
+
+        mr = mra[1] / (mra[0] - mra[1])
+        if mra[0] > 25 and mr >= 0.4:
+            asmbot.log("Guild {} ({}) has too high bot-to-human ratio ({:.0f}% at {:n} members)".format(guild.name, guild.id, mr * 100, mra[0]), tag="ASM CORE")
+            await self.leave_server(guild)
+
+        self.processed_guilds += guild.id
 
     # Command and chat handling
     async def on_message(self, message):

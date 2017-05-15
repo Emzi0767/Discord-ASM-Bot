@@ -25,11 +25,14 @@ def main():
     processes = []
 
     for i in range(0, int(tkd["shard_count"])):
-        args = {}
-        args["token"] = tkd["token"]
-        args["shard_id"] = i
-        args["shard_count"] = int(tkd["shard_count"])
-        args["script"] = tkd["script"]
+        args = {
+            "token": tkd["token"],
+            "shard_id": i,
+            "shard_count": int(tkd["shard_count"]),
+            "script": tkd["script"],
+            "guild_blacklist": tkd["guild_blacklist"],
+            "guild_exempt_list": tkd["guild_exempt_list"]
+        }
 
         loop.create_task(launch_process(executor, asmbotlauncher.initialize_asmbot, **args))
 

@@ -32,12 +32,14 @@ class AsmBotLauncher:
         asmbot_totalshards = kwargs.get("shard_count", 1)
         asmbot_token = kwargs.get("token", None)
         asmbot_script = kwargs.get("script", None)
+        asmbot_blacklist = kwargs.get("guild_blacklist", [])
+        asmbot_exempt_list = kwargs.get("guild_exempt_list", [])
 
         # init pam
         asmbot.log("Initializing ASM", tag="ASM")
         asmbot_config = {"shard_id": asmbot_shard, "shard_count": asmbot_totalshards}
 
-        asmbot_bot = asmbot.AsmBot(**asmbot_config)
+        asmbot_bot = asmbot.AsmBot(asmbot_blacklist, asmbot_exempt_list, **asmbot_config)
         asmbot_bot.remove_command("help")
 
         asmbot_cmd = asmbot.AsmBotCommands(asmbot_bot)
@@ -64,7 +66,7 @@ class AsmBotLauncher:
                 task.cancel()
                 try:
                     loop.run_until_complete(task)
-                except Exception:
+                except:
                     pass
 
             loop.close()
@@ -83,8 +85,18 @@ if __name__ == "__main__":
     parser.add_argument("-c", "--shard-count", type=int, dest="shard_count", help="Total shard count", default=1)
     parser.add_argument("-t", "--token", type=str, dest="token", help="Bot's token", default=None)
     parser.add_argument("-a", "--assembler-script", type=str, dest="script", help="Assembler script path", default=None)
+    parser.add_argument("-b", "--guild-blacklist", type=str, dest="guild_blacklist", help="Guilds to blacklist", default=None)
+    parser.add_argument("-x", "--guild-exempt-list", type=str, dest="guild_exempt_list", help="Guilds to exempt from blacklist checks", default=None)
 
     args = parser.parse_args()
     args = vars(args)
+
+    blacklist = args.get("guild_blacklist", None)
+    blacklist = blacklist or ""
+    args["guild_blacklist"] = blacklist.split(",")
+
+    exempt_list = args.get("guild_exempt_list", None)
+    exempt_list = exempt_list or ""
+    args["guild_exempt_list"] = exempt_list.split(",")
 
     initialize_asmbot(**args)
