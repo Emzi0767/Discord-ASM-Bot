@@ -1,12 +1,12 @@
 """
 ASM - Assembler bot
 
-A Discord bot by Emzi0767. Designed to quickly assemble x86, x86_64 and ARM assembly.
+A Discord bot by Emzi0767. Designed to quickly assemble x86, x86_64, ARM, MIPS, and PowerPC assembly.
 """
 
 __name__ = "asmbot"
 __author__ = "Emzi0767"
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 __license__ = "Apache License 2.0"
 __copyright__ = "Copyright 2017 Emzi0767"
 

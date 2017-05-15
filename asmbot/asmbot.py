@@ -82,7 +82,7 @@ class AsmBot(commands.Bot):
 
                 if tdelta.seconds >= 900:
                     lop = cop
-                    await self.change_presence(game=discord.Game(name="RYZEN HYYYYYYYPEEEE"))
+                    await self.change_presence(game=discord.Game(name="LLVM"))
 
                 await asyncio.sleep(0.1)
 
