@@ -4,7 +4,7 @@
 
 ## ABOUT
 
-A Discord bot built on top of [discord.py library](https://github.com/Rapptz/discord.py/). It's designed to allow quickly assembing x86, x86_64, and ARM assembly, and output resulting bytes.
+A Discord bot built on top of [discord.py library](https://github.com/Rapptz/discord.py/). It's designed to allow quickly assembing x86, x86_64, ARM (v6, v7, v8, and AArch64), MIPS, and PowerPC (PPC and PPC64) assembly, and output resulting bytes.
 
 ASM is built around LLVM.
 
