@@ -16,6 +16,7 @@ class AsmBot(commands.Bot):
         self.guild_blacklist = guild_blacklist
         self.guild_exempt_list = guild_exempt_list
         self.processed_guilds = []
+        self.gamewatch_running = False
 
     def cancel_everything(self):
         self.future.cancel()
@@ -49,8 +50,8 @@ class AsmBot(commands.Bot):
         self.tasks.remove(fut)
         fut.cancel()
 
-        if not self.is_closed:
-            asmbot.log("Rick roll for shard {} crashed, restarting".format(self.shard_id), tag="ASM GAME")
+        if not self.is_closed and not self.gamewatch_running:
+            asmbot.log("Gamewatch for shard {} crashed, restarting".format(self.shard_id), tag="ASM GAME")
             task = self.loop.create_task(self.game_watch())
             task.add_done_callback(self._restart_gamewatch)
             self.tasks.append(task)
@@ -67,6 +68,10 @@ class AsmBot(commands.Bot):
         self._future = value
 
     async def game_watch(self):
+        if self.gamewatch_running:
+            return
+
+        self.gamewatch_running = True
         try:
             lop = datetime.datetime(2015, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
             asmbot.log("Gamewatch for shard {} initialized".format(self.shard_id), tag="ASM GAME")
@@ -88,6 +93,7 @@ class AsmBot(commands.Bot):
             asmbot.logex(e, tag="ASM GAME")
 
         finally:
+            self.gamewatch_running = False
             asmbot.log("Gamewatch for shard {} closed".format(self.shard_id), tag="ASM GAME")
 
     # Error handling
@@ -123,8 +129,12 @@ class AsmBot(commands.Bot):
         await self.send_message(context.message.channel, embed=embed)
 
     # Bot preparation
+    async def on_resumed(self):
+        await self.on_ready()
+
     async def on_ready(self):
-        asmbot.log("Logged in as {} on shard {} as PID {:05}".format(self.user.name, self.shard_id, os.getpid()), tag="INSTANCE")
+        self.processed_guilds = []
+        asmbot.log("Logged in as {} on shard {} as PID {:05}".format(self.user.name, self.shard_id, os.getpid()), tag="ASM CORE")
 
         for gld in self.servers:
             await self.on_server_available(gld)
