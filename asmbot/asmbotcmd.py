@@ -72,8 +72,8 @@ class AsmBotCommands:
                                                    "(https://discord.gg/rGKrJDR).", "info")
         embed.add_field(name="Example", value=me.mention + " x86\n```asm\nmov eax, sp\n```", inline=False)
         embed.add_field(name="Available architectures", value="`x86`: `x86`, `i386`\n`x86 (AT&T syntax)`: `x86_att`, `i386_att`\n`x64`: `x64`, `x86_64`\n`x64 (AT&T syntax)`: `x64_att`, "
-                                                              "`x86_64_att`\n`ARMv6`: `armv6`, `armv6k`\n`ARMv7`, `armv7`, `armv7a`\n`ARMv8`: `armv8`, `armv8a`\n`AArch64 (64-bit ARMv8)`: `aarch64`\n"
-                                                              "`MIPS`: `mips`\n`MIPS little-endian`: `mipsel`, `mips_le`", inline=False)
+                                                              "`x86_64_att`\n`ARMv6`: `armv6`, `armv6k`\n`ARMv7`, `armv7`, `armv7a`\n`ARMv8`: `armv8`, `armv8a`\n`AArch64 (64-bit ARMv8)`: `aarch64`, "
+                                                              "`arm64`\n`MIPS`: `mips`\n`MIPS little-endian`: `mipsel`, `mips_le`", inline=False)
 
         await ctx.bot.say(embed=embed)
 
@@ -149,7 +149,7 @@ class AsmBotCommands:
 
         await ctx.bot.say("```\n" + snip + "\n```")
 
-    @commands.command(name="aarch64", description="Assemble AArch64 (64-bit ARMv8) assembly", pass_context=True)
+    @commands.command(name="aarch64", description="Assemble AArch64 (64-bit ARMv8) assembly", pass_context=True, aliases=["arm64"])
     async def aarch64(self, ctx, *, code):
         """
         Assembles AArch64 (64-bit ARMv8) assembly
