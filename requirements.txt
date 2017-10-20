@@ -1,2 +1,2 @@
-discord.py>=0.16.5
+git+https://github.com/Rapptz/discord.py@91e2163523ac04705e8730f547eed7a9ff502663#egg=discord.py
 psutil>=5.1.2

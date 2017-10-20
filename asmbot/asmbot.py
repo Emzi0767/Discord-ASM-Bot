@@ -44,7 +44,7 @@ class AsmBot(commands.Bot):
         return embed
 
     def _prefix(self, guild):
-        return ["<@" + self.user.id + "> ", "<@!" + self.user.id + "> "]
+        return ["<@" + str(self.user.id) + "> ", "<@!" + str(self.user.id) + "> "]
 
     def _restart_gamewatch(self, fut):
         self.tasks.remove(fut)
@@ -57,7 +57,7 @@ class AsmBot(commands.Bot):
             self.tasks.append(task)
 
     def prefix_callback(self, bot, message):
-        return self._prefix(message.channel.server)
+        return self._prefix(message.channel.guild)
 
     @property
     def future(self):
@@ -102,7 +102,7 @@ class AsmBot(commands.Bot):
         exfmts = [s.replace("\\n", "") for s in traceback.format_exception(*exinfo)]
         asmbot.log(*exfmts, tag="ASM ERR")
 
-    async def on_command_error(self, exception, context):
+    async def on_command_error(self, context, exception):
         extype = type(exception)
         value = exception
         tback = exception.__traceback__
@@ -122,11 +122,15 @@ class AsmBot(commands.Bot):
             return
         cmd = context.command.qualified_name
 
-        embed = self._embed(context, "Error executing command",
-                            "An error occured when executing command `{}`".format(cmd), "error")
+        iex = exception.original if isinstance(exception, commands.CommandInvokeError) else None
+        if iex and isinstance(iex, asmbot.AssemblerException):
+            embed = self._embed(context, "Error assembling code", "An error occured when assembling code", "error")
+            embed.add_field(name="Details", value=f"```\n{iex.clang_data}\n```", inline=False)
+        else:
+            embed = self._embed(context, "Error executing command", "An error occured when executing command `{}`".format(cmd), "error")
 
         asmbot.log(*exfmts, tag="CMD ERR")
-        await self.send_message(context.message.channel, embed=embed)
+        await context.message.channel.send(embed=embed)
 
     # Bot preparation
     async def on_resumed(self):
@@ -136,18 +140,18 @@ class AsmBot(commands.Bot):
         self.processed_guilds = []
         asmbot.log("Logged in as {} on shard {} as PID {:05}".format(self.user.name, self.shard_id, os.getpid()), tag="ASM CORE")
 
-        for gld in self.servers:
-            await self.on_server_available(gld)
+        for gld in self.guilds:
+            await self.on_guild_available(gld)
 
         task = self.loop.create_task(self.game_watch())
         task.add_done_callback(self._restart_gamewatch)
         self.tasks.append(task)
 
     # Guild init
-    async def on_server_join(self, guild):
-        await self.on_server_available(guild)
+    async def on_guild_join(self, guild):
+        await self.on_guild_available(guild)
 
-    async def on_server_available(self, guild):
+    async def on_guild_available(self, guild):
         if guild.id in self.processed_guilds:
             return
 
@@ -156,7 +160,7 @@ class AsmBot(commands.Bot):
         # check blacklist
         if guild.id in self.guild_exempt_list:
             asmbot.log("Ignoring exempt guild {} ({})".format(guild.name, guild.id), tag="ASM CORE")
-            self.processed_guilds += guild.id
+            self.processed_guilds.append(guild.id)
             return
 
         if guild.id in self.guild_blacklist:
@@ -174,11 +178,12 @@ class AsmBot(commands.Bot):
             asmbot.log("Guild {} ({}) has too high bot-to-human ratio ({:.0f}% at {:n} members)".format(guild.name, guild.id, mr * 100, mra[0]), tag="ASM CORE")
             await self.leave_server(guild)
 
-        self.processed_guilds += guild.id
+        self.processed_guilds.append(guild.id)
 
     # Command and chat handling
     async def on_message(self, message):
-        if message.channel.is_private:
+        #if message.channel.is_private:
+        if not isinstance(message.channel, discord.TextChannel):
             return
 
         if message.author.bot:
@@ -186,12 +191,12 @@ class AsmBot(commands.Bot):
 
         await self.process_commands(message)
 
-    async def on_command(self, command, context):
+    async def on_command(self, context):
         pass
 
-    async def on_command_completion(self, command, context):
+    async def on_command_completion(self, context):
         usr = context.message.author
-        chn = context.message.channel
-        gld = chn.server
-        asmbot.log("{} ({}) executed command {} in guild {} ({}) on shard {}, channel {} ({})".format(usr, usr.id, command.qualified_name, gld.name, gld.id, self.shard_id, chn.name, chn.id),
+        chn = context.channel
+        gld = context.guild
+        asmbot.log("{} ({}) executed command {} in guild {} ({}) on shard {}, channel {} ({})".format(usr, usr.id, context.command.qualified_name, gld.name, gld.id, self.shard_id, chn.name, chn.id),
                    tag="ASM CMD")

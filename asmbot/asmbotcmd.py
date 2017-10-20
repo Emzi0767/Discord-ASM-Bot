@@ -1,5 +1,6 @@
 import subprocess
 import discord
+import asmbot
 from discord.ext import commands
 
 
@@ -72,9 +73,13 @@ class AsmBotCommands:
         script_args = arch + " " + clang_args
         script_line = "bash " + self.script + " " + script_args
 
-        proc = subprocess.Popen(script_line, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE)
-        output = proc.communicate(input=code.encode())
-        output = output[0].decode()
+        proc = subprocess.Popen(script_line, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        pipes = proc.communicate(input=code.encode())
+        output = pipes[0].decode()
+        errors = pipes[1].decode()
+
+        if errors:
+            raise asmbot.AssemblerException(errors)
 
         sfind = "Contents of section .text:"
         oi = output.index(sfind)
@@ -92,12 +97,12 @@ class AsmBotCommands:
 
         return " ".join(obytes)
 
-    @commands.command(name="help", description="Prints help text", pass_context=True)
+    @commands.command(name="help", description="Prints help text")
     async def help(self, ctx, *, architecture: str = None):
         """
         Prints help
         """
-        me = ctx.message.channel.server.me
+        me = ctx.guild.me
 
         if architecture is None:
             embed = self._embed(ctx, "Assembler help", "To invoke Assembler, call {} assemble `<architecture>` `<assembly code block>`. For help, call {} help or {} help `[architecture]` to show how"
@@ -124,9 +129,9 @@ class AsmBotCommands:
             archstr = ", ".join("`{}`".format(x) for x in arch.names)
             embed.add_field(name="Architecture aliases", value=archstr, inline=False)
 
-        await ctx.bot.say(embed=embed)
+        await ctx.channel.send(embed=embed)
 
-    @commands.command(name="assemble", description="Assembles given assembly for given architecture", pass_context=True, aliases=["asm"])
+    @commands.command(name="assemble", description="Assembles given assembly for given architecture", aliases=["asm"])
     async def assemble(self, ctx, architecture: str, *, code):
         """
         Assembles given assembly for given architecture
@@ -145,7 +150,7 @@ class AsmBotCommands:
             snip = arch.code_addon + snip
         snip = self._assemble(snip, arch.clang_name, arch.clang_options)
 
-        await ctx.bot.say("```\n" + snip + "\n```")
+        await ctx.channel.send("```\n" + snip + "\n```")
 
 
 class ArchitectureMap(object):
