@@ -165,7 +165,7 @@ class AsmBot(commands.Bot):
 
         if guild.id in self.guild_blacklist:
             asmbot.log("Leaving blacklisted guild {} ({})".format(guild.name, guild.id), tag="ASM CORE")
-            await self.leave_server(guild)
+            await guild.leave()
 
         mra = [0, 0]
         for xm in guild.members:
@@ -176,7 +176,7 @@ class AsmBot(commands.Bot):
         mr = mra[1] / (mra[0] - mra[1])
         if mra[0] > 25 and mr >= 0.4:
             asmbot.log("Guild {} ({}) has too high bot-to-human ratio ({:.0f}% at {:n} members)".format(guild.name, guild.id, mr * 100, mra[0]), tag="ASM CORE")
-            await self.leave_server(guild)
+            await guild.leave()
 
         self.processed_guilds.append(guild.id)
 
