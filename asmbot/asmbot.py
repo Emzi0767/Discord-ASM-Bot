@@ -178,7 +178,7 @@ class AsmBot(commands.Bot):
             if mra[0] > 25 and mr >= 0.4:
                 asmbot.log("Guild {} ({}) has too high bot-to-human ratio ({:.0f}% at {:n} members)".format(guild.name, guild.id, mr * 100, mra[0]), tag="ASM CORE")
                 await guild.leave()
-        else:
+        elif mra[0] > 0:
             asmbot.log("Guild {} ({}) appears to have no human members ({:n} total)".format(guild.name, guild.id, mra[0]), tag="ASM CORE")
             await guild.leave()
 
