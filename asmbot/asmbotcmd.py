@@ -71,7 +71,7 @@ class AsmBotCommands:
 
     def _assemble(self, code, arch, clang_args=""):
         script_args = arch + " " + clang_args
-        script_line = "bash " + self.script + " " + script_args
+        script_line = "sh " + self.script + " " + script_args
 
         proc = subprocess.Popen(script_line, shell=True, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
         pipes = proc.communicate(input=code.encode())
