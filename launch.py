@@ -5,6 +5,7 @@ import asmbotlauncher
 import asmbot
 from concurrent.futures import ThreadPoolExecutor
 from concurrent.futures import CancelledError
+from os import getenv, environ as env
 
 
 def main():
@@ -13,8 +14,10 @@ def main():
 
     asmbot.log("ASM version {} booting".format(asmbot.__version__), tag="ASM LDR")
 
-    asmbot.log("Loading config", tag="PAM LDR")
-    with open("config.json", "r") as f:
+    asmbot.log("Loading config", tag="ASM LDR")
+    configName = f"/run/secrets/{env['DOCKER_SECRET']}" if getenv("DOCKER_SECRET") else "config.json"
+    asmbot.log("Config will be loaded from {}".format(configName), tag="ASM LDR")
+    with open(configName, "r") as f:
         cts = f.read()
         tkd = json.loads(cts)
 
