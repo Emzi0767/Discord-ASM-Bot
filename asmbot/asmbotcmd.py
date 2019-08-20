@@ -4,7 +4,7 @@ import asmbot
 from discord.ext import commands
 
 
-class AsmBotCommands:
+class AsmBotCommands(commands.Cog):
     def __init__(self, bot):
         self._bot = bot
         # Commented out ones require clang-4.0+ or binaries not available on my system. Feel free to test them, and enable them if they work for you.
