@@ -50,7 +50,7 @@ class AsmBot(commands.Bot):
         self.tasks.remove(fut)
         fut.cancel()
 
-        if not self.is_closed and not self.gamewatch_running:
+        if not self.is_closed() and not self.gamewatch_running:
             asmbot.log("Gamewatch for shard {} crashed, restarting".format(self.shard_id), tag="ASM GAME")
             task = self.loop.create_task(self.game_watch())
             task.add_done_callback(self._restart_gamewatch)
@@ -76,17 +76,17 @@ class AsmBot(commands.Bot):
             lop = datetime.datetime(2015, 1, 1, 0, 0, 0, tzinfo=datetime.timezone.utc)
             asmbot.log("Gamewatch for shard {} initialized".format(self.shard_id), tag="ASM GAME")
 
-            while not self.is_closed:
+            while not self.is_closed():
                 cop = datetime.datetime.now(datetime.timezone.utc)
                 tdelta = cop - lop
 
                 if tdelta.seconds >= 900:
                     lop = cop
-                    await self.change_presence(game=discord.Game(name="LLVM"))
+                    await self.change_presence(activity=discord.Game(name="LLVM"))
 
                 await asyncio.sleep(0.1)
 
-        except CancelledError:
+        except CancelledError as e:
             pass
 
         except Exception as e:
